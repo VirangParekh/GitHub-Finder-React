@@ -10,13 +10,31 @@ import {
   GET_USER,
 } from "../types";
 
+let GithubClientId;
+let GithubClientSecret;
+
+if (process.env.NODE_ENV !== "production") {
+  GithubClientId = process.env.REACT_APP_GITHUB_CLIENT_ID;
+  GithubClientSecret = process.env.REACT_APP_GITHUB_CLIENT_SECRET;
+} else {
+  GithubClientId = process.env.GITHUB_CLIENT_ID;
+  GithubClientSecret = process.env.GITHUB_CLIENT_SECRET;
+}
+
 const GithubState = (props) => {
+  const initalState = {
+    users: [],
+    user: {},
+    repos: [],
+    loading: false,
+  };
+
   const [state, dispatch] = useReducer(githubReducer, initalState);
 
   const searchUsers = async (text) => {
     setLoading();
     const response = await axios.get(
-      `https://api.github.com/search/users?q=${text}&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+      `https://api.github.com/search/users?q=${text}&client_id=${GithubClientId}&client_secret=${GithubClientSecret}`
     );
 
     dispatch({
@@ -34,7 +52,7 @@ const GithubState = (props) => {
   const getUser = async (username) => {
     setLoading();
     const response = await axios.get(
-      `https://api.github.com/users/${username}?&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+      `https://api.github.com/users/${username}?&client_id=${GithubClientId}&client_secret=${GithubClientSecret}`
     );
     dispatch({
       type: GET_USER,
@@ -45,19 +63,12 @@ const GithubState = (props) => {
   const getUserRepos = async (username) => {
     setLoading();
     const response = await axios.get(
-      `https://api.github.com/users/${username}/repos?per_page=5&sort=created:asc&client_id=${process.env.REACT_APP_GITHUB_CLIENT_ID}&client_secret=${process.env.REACT_APP_GITHUB_CLIENT_SECRET}`
+      `https://api.github.com/users/${username}/repos?per_page=5&sort=created:asc&client_id=${GithubClientId}&client_secret=${GithubClientSecret}`
     );
     dispatch({
       type: GET_REPOS,
       payload: response.data,
     });
-  };
-
-  const initalState = {
-    users: [],
-    user: {},
-    repos: [],
-    loading: false,
   };
 
   return (
